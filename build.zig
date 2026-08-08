@@ -11,6 +11,17 @@ pub fn build(b: *std.Build) !void {
         .link_libc = true,
     });
 
+    const translate_c = b.dependency("translate_c", .{});
+    const Translator = @import("translate_c").Translator;
+
+    const t: Translator = .init(translate_c, .{
+        .c_source_file = b.path("nativefiledialog/src/include/nfd.h"),
+        .target = target,
+        .optimize = optimize,
+    });
+
+    nfd_mod.addImport("c", t.mod);
+
     const cflags = [_][]const u8{"-Wall"};
     nfd_mod.addIncludePath(b.path("nativefiledialog/src/include"));
     nfd_mod.addCSourceFile(.{ .file = b.path("nativefiledialog/src/nfd_common.c"), .flags = &cflags });
